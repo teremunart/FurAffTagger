@@ -53,7 +53,7 @@ document.addEventListener('input', (e) => {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         const matches = currentWord.length >= 1
-            ? allTags.filter(t => t.name.contains(currentWord)).sort((a,b) => b.count - a.count).slice(0, 15)
+            ? allTags.filter(t => t.name.includes(currentWord)).sort((a,b) => b.count - a.count).slice(0, 15)
             : allTags.slice(0, 15);
         renderSuggestions(input, matches, currentWord);
     }, 100);
@@ -142,5 +142,7 @@ function removeBox() {
 }
 
 document.addEventListener('mousedown', (e) => {
-    if (suggestionBox && !suggestionBox.includes(e.target) && e.target.id !== 'keywords') removeBox();
+    if (suggestionBox && !suggestionBox.contains(e.target) && e.target.id !== 'keywords') {
+        removeBox();
+    }
 });

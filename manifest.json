@@ -13,6 +13,7 @@
   ],
   "web_accessible_resources": [
     {
+      "resources": ["style.css"],
       "matches": ["*://*.furaffinity.net/*"]
     }
   ]

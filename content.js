@@ -142,5 +142,5 @@ function removeBox() {
 }
 
 document.addEventListener('mousedown', (e) => {
-    if (suggestionBox && !suggestionBox.contains(e.target) && e.target.id !== 'keywords') removeBox();
+    if (suggestionBox && !suggestionBox.includes(e.target) && e.target.id !== 'keywords') removeBox();
 });

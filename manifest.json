@@ -1,8 +1,7 @@
 {
   "manifest_version": 3,
   "name": "FA Tag Autocomplete",
-  "version": "1.3",
-  "permissions": ["storage"],
+  "version": "1.4",
   "host_permissions": ["https://raw.githubusercontent.com/*"],
   "content_scripts": [
     {

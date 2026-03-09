@@ -6,6 +6,7 @@ let lastQuery = null;
 
 const CSV_URL = "https://raw.githubusercontent.com/DraconicDragon/dbr-e621-lists-archive/refs/heads/main/tag-lists/e621/e621_2026-01-01_pt20-ia-ed.csv";
 
+//region Data Loading and Processing
 fetch(CSV_URL)
     .then(r => r.text())
     .then(data => {
@@ -28,19 +29,30 @@ function getCurrentWord(input) {
     const words = textBefore.split(/\s+/);
     return words[words.length - 1].toLowerCase();
 }
+//endregion
 
+//region Event Listeners
+
+// Click inside the InputBox
 document.addEventListener('mousedown', (e) => {
     if (e.target.id === 'keywords') {
         setTimeout(() => {
             const word = getCurrentWord(e.target);
-            const matches = word.length >= 1
-                ? allTags.filter(t => t.name.startsWith(word)).slice(0, 15)
-                : allTags.slice(0, 15);
+            let matches;
+            if (word.length >= 1) {
+                matches = allTags
+                    .filter(t => t.name.startsWith(word))
+                    .sort((a, b) => b.count - a.count)
+                    .slice(0, 20);
+            } else {
+                matches = allTags.slice(0, 20);
+            }
             renderSuggestions(e.target, matches, word);
         }, 10);
     }
 });
 
+// Typing
 document.addEventListener('input', (e) => {
     if (e.target.id !== 'keywords') return;
 
@@ -52,13 +64,33 @@ document.addEventListener('input', (e) => {
 
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
-        const matches = currentWord.length >= 1
-            ? allTags.filter(t => t.name.includes(currentWord)).sort((a,b) => b.count - a.count).slice(0, 15)
-            : allTags.slice(0, 15);
+        let matches = [];
+
+        if (currentWord.length >= 1) {
+            // Tags that START with the letter(s)
+            const startsWith = allTags
+                .filter(t => t.name.startsWith(currentWord))
+                .sort((a, b) => b.count - a.count);
+
+            // Tags that INCLUDE the letters
+            const includesOnly = allTags
+                .filter(t => t.name.includes(currentWord) && !t.name.startsWith(currentWord))
+                .sort((a, b) => b.count - a.count);
+
+            // Top 5 startsWith, then fill the rest with includes
+            const topStarts = startsWith.slice(0, 5);
+            const theRest = [...startsWith.slice(5), ...includesOnly];
+
+            matches = [...topStarts, ...theRest].slice(0, 20);
+        } else {
+            matches = allTags.slice(0, 20);
+        }
+
         renderSuggestions(input, matches, currentWord);
     }, 100);
 });
 
+// Navigation
 document.addEventListener('keydown', (e) => {
     if (!suggestionBox || e.target.id !== 'keywords') return;
 
@@ -78,7 +110,9 @@ document.addEventListener('keydown', (e) => {
         removeBox();
     }
 });
+//endregion
 
+//region Suggestion Box
 function renderSuggestions(input, matches, query) {
     removeBox();
     if (matches.length === 0) return;
@@ -120,8 +154,7 @@ function renderSuggestions(input, matches, query) {
             input.focus();
 
             lastQuery = "";
-            const nextMatches = allTags.slice(0, 15);
-            renderSuggestions(input, nextMatches, "");
+            renderSuggestions(input, allTags.slice(0, 20), "");
         };
         suggestionBox.appendChild(item);
     });
@@ -140,7 +173,9 @@ function removeBox() {
         selectedIndex = -1;
     }
 }
+//endregion
 
+// Close box when clicking outside
 document.addEventListener('mousedown', (e) => {
     if (suggestionBox && !suggestionBox.contains(e.target) && e.target.id !== 'keywords') {
         removeBox();
